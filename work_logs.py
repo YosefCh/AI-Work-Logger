@@ -7,8 +7,20 @@ from AI_Class import OpenAIClient
 
 
 class WorkLog:
-    def __init__(self):
-        self.ai = OpenAIClient(reasoning="high") 
+    def __init__(self, txt_file_path="work_logs.txt", csv_file_path="work_logs.csv"):
+        """
+        Initialize WorkLog with file paths.
+        
+        Args:
+            txt_file_path (str): Path to text file for logs. Defaults to 'work_logs.txt' in current directory.
+            csv_file_path (str): Path to CSV file for logs. Defaults to 'work_logs.csv' in current directory.
+        """
+        self.ai = OpenAIClient(reasoning="high")
+        
+        # Use absolute paths based on current script location
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        self.txt_file_path = os.path.join(script_dir, txt_file_path) if not os.path.isabs(txt_file_path) else txt_file_path
+        self.csv_file_path = os.path.join(script_dir, csv_file_path) if not os.path.isabs(csv_file_path) else csv_file_path 
 
     def summarize_log(self, raw_log):
         summary_prompt = f"""
@@ -38,15 +50,30 @@ class WorkLog:
         
 
     def write_to_text_file(self, text_log):
+        """
+        Write formatted log to text file. Creates file if it doesn't exist.
         
+        Args:
+            text_log (str): Formatted work log text to write
+        """
         date_str = datetime.datetime.now().strftime("%Y-%m-%d")
         separator = "\n" + "*" * 40 + "\n"
-        with open(r"C:\Users\yosefb\OneDrive - Lerman Enterprise\Documents\Yosef Logs\work_logs.txt", "a") as file:
-            date_str = f"--- {date_str} ---"
-            file.write(date_str + "\n")
+        
+        # Create file if it doesn't exist
+        if not os.path.exists(self.txt_file_path):
+            with open(self.txt_file_path, "w", encoding='utf-8') as file:
+                file.write("# Work Log Archive\n")
+                file.write("# Created: " + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + "\n")
+                file.write(separator)
+        
+        # Append the log entry
+        with open(self.txt_file_path, "a", encoding='utf-8') as file:
+            date_header = f"--- {date_str} ---"
+            file.write(date_header + "\n")
             file.write(text_log + "\n")
             file.write(separator)
-        print("Work log written to file.")
+        
+        print(f"Work log written to {self.txt_file_path}")
 
 
     def generate_key_words(self, text_log):
@@ -74,29 +101,32 @@ class WorkLog:
 
     def write_to_csv(self, cleaned_text, abridged_summary):
         """
-        Write work log data to CSV file with columns: Date, Full Text (Logs), Abridged
+        Write work log data to CSV file with columns: Date, Full_Text, Abridged
         Creates the file with headers if it doesn't exist, otherwise appends.
+        
+        Args:
+            cleaned_text (str): Formatted work log text
+            abridged_summary (str): Keyword summary of the work log
         """
-        csv_file_path = r"C:\Users\yosefb\OneDrive - Lerman Enterprise\Documents\Yosef Logs\work_logs.csv"
         date_str = datetime.datetime.now().strftime("%Y-%m-%d")
         
         # Replace newlines with space for better CSV display
         cleaned_text_single_line = cleaned_text.replace('\n', ' ').strip()
         
         # Check if file exists to determine if we need to write headers
-        file_exists = os.path.isfile(csv_file_path)
+        file_exists = os.path.isfile(self.csv_file_path)
         
-        with open(csv_file_path, "a", newline='', encoding='utf-8') as file:
+        with open(self.csv_file_path, "a", newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             
             # Write headers if file is new
             if not file_exists:
-                writer.writerow(["Date", "Full Text (Logs)", "Abridged"])
+                writer.writerow(["Date", "Full_Text", "Abridged"])
             
             # Write the data row
             writer.writerow([date_str, cleaned_text_single_line, abridged_summary])
         
-        print("Work log written to CSV.")
+        print(f"Work log written to {self.csv_file_path}")
 
     def process_log(self, raw_log):
         """
