@@ -1,4 +1,20 @@
-API_KEY = "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"
+import json
+import os
+
+def load_api_key():
+    """Load API key from config.json file"""
+    config_path = os.path.join(os.path.dirname(__file__), 'config.json')
+    try:
+        with open(config_path, 'r') as f:
+            config = json.load(f)
+            return config.get('openai_api_key')
+    except FileNotFoundError:
+        raise FileNotFoundError(
+            "config.json not found. Please create it from config.example.json "
+            "and add your OpenAI API key."
+        )
+
+API_KEY = load_api_key()
 
 
 class OpenAIClient:
