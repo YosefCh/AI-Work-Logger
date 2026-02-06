@@ -1,0 +1,100 @@
+## PsuedoCode for the Work Log Program
+## The ************* separator = a new method or function.
+## The ______________ separator surrounds prompts to be fed to LLMs
+
+
+
+1. CLEAN INPUT 
+- First method will take the raw unstructured input and convert into a clean summary. This will be accomplished by using an
+LLM (doesn't have to be gpt-latest) REMEMBER USE LOW TEMP AND TOP P AS WE WANT TO STAY CLOSE TO THE TEXT
+
+Here is an example prompt for an LLM:
+_________________________________________________________________________________________________________________________________________________________________________________________________
+You are a formatting assistant that rewrites a daily work log into a clean, professional, plain-text format suitable for storage in a text file.
+
+### Input:
+A rough, unstructured dictation or set of notes describing what was done during the workday.
+
+### Output:
+Return only the formatted text. Do not include explanations, headings, or Markdown. 
+Follow this structure exactly:
+
+
+- Write each major action as a single bullet point, starting with a clear verb (e.g., "Reviewed", "Updated", "Met with").
+- Group related details as nested bullets *only when necessary* to clarify substeps or structure (e.g., when describing a process explained by someone or a multi-part task).
+- Remove filler, hesitation, or irrelevant personal thoughts.
+- Keep concise but preserve meaningful technical, procedural, or context information that may be useful for future reference (e.g., systems, tools, people, report names, file paths, or concepts).
+- Avoid over-summarizing; keep specific names of reports, folders, and systems when mentioned.
+- End with a single closing bullet if any cleanup, final documentation, or wrap-up occurred.
+
+Return only the formatted list and dashed lines, ready to append to a `.txt` file.
+____________________________________________________________________________________________________________________________________________________________________________________________________
+
+*****************************************************************
+
+
+
+2. WRITE TO TEXT FILE
+- Write to text file (already created) by having the program first include date as a header, skip a line or two, and append the data, and create a few lines and some "***********" as separators.
+This file can be used for simple reading of the contents and searching would involve using CTRL + F and by manually looking the dates to filter by day.
+
+*******************************************************************
+
+
+
+3. SUMMARIZE THE WORK LOGS
+- Further summarize to get a quick overview which can maybe be used for dashbaords or visuals down the road (as duck db will query fine using ILIKE from the full text work log).
+This will also need an LLM in the function.
+
+Here is an example prompt for an LLM
+__________________________________________________________________________________________________________________________________________________________________________________________________________________ 
+You are a keyword extraction assistant.
+
+Your task: Given a formatted daily work log (a list of bullet points), produce a concise one-line summary made up only of keywords and short phrases.
+
+Guidelines:
+- Use 5–12 concise keywords or short phrases separated by commas.
+- Focus on main systems, projects, processes, and people mentioned (e.g., Invex, PFEP, Helpdesk, Maestro, EDI, ByRequest, Work Log Program).
+- Do not include filler words, dates, or generic verbs (like reviewed, fixed, updated).
+- Maintain original capitalization of system or product names.
+- Output must fit on one line and contain no extra explanation, punctuation, or markdown — just the comma-separated keywords.
+
+Return only the keyword line.
+__________________________________________________________________________________________________________________________________________________________________________________________________________________ 
+
+***********************************************************************
+
+
+
+4. WRITE TO CSV FILE
+- Write to CSV file (already created).
+Program needs to add col headers; Date, Full Text (Logs), Abridged.
+Add todays date to the date col, the output of function 1. (CLEAN INPUT) to the Full Text col, and the output of function 3. to the Abridged col.
+
+***********************************************************************
+
+
+
+5. CONNECT DUCK DB 
+- Connect csv file to a duck db, (see our SPACED MEMORY REVIEW project on Github for a template).
+
+***********************************************************************
+
+
+
+6. QUERY FUNCTION 
+- Function that user can use full SQL queries
+OR Function that user can enter multiple keywords which the program will enter into a an OR query template which will also support date searching.
+AND Function that user can enter multiple keywords which the program will enter into a an AND query template which will also support date searching.
+Create ipynb file as a dashboard for the querying.
+
+***********************************************************************
+
+
+
+7. (OPTIONAL) CONNECT TO POWER BI/FABRIC
+- Create visuals.
+
+
+
+
