@@ -57,28 +57,32 @@ Your day's work will be:
    - Saved to a <code>.csv</code> file to function as a database for the query and analyze tool
 
 
-### Analyzing Work Logs
+## Analyzing Work Logs
 
 Open work_log_analytics.ipynb and use one of three methods:
 
-#### 1. Direct SQL Queries
+### 1. Direct SQL Queries
 Execute SQL queries directly on your work logs. 
 
 Example queries:
 - SELECT * FROM work_logs WHERE Full_Text ILIKE '%helpdesk%' ORDER BY Date DESC
 - SELECT Date, Abridged FROM work_logs WHERE Date >= '2026-01-01'
-- SELECT * FROM work_logs WHERE Full_Text ILIKE '%Plex%' OR Full_Text ILIKE '%Fabric%'
+- SELECT * FROM work_logs WHERE Full_Text ILIKE '%Power Bi%' OR Full_Text ILIKE '%Fabric%'
 
-#### 2. Natural Language Queries
+<br>
+
+### 2. Natural Language Queries
 Ask questions in plain English - the system converts them to SQL automatically.
 
 Example questions:
 - "Show me all work related to Plex from the last month"
 - "What did I work on last week?"
-- "Find logs mentioning Maestro or EDI"
+- "Find logs mentioning unfinished reports or tasks"
 - "Show me logs from January 2026"
 
-#### 3. Generate Summaries
+<br>
+
+### 3. Generate Summaries
 Create executive summaries for any time period or topic.
 
 Example requests:
@@ -86,9 +90,11 @@ Example requests:
 - "All work from January 2026"
 - "Everything related to Plex or Fabric"
 - "Help desk activities"
-- "Work with Invex API"
+- "Work with the new API"
 
-#### 4. Ask Analytical Questions
+<br>
+
+### 4. Ask Analytical Questions
 Get specific answers, evaluations, and ratings about work performance.
 
 Example questions:
