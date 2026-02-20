@@ -127,7 +127,7 @@ Edit the reasoning level or model in work_logs.py or duckdb_example.py by modify
 
 ## 📝 License
 
-This project is for personal or organizational use. Modify as needed.
+This project is under the __Affero General Public License (AGPL)__
 
 ## 🤝 Contributing
 
