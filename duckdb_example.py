@@ -29,24 +29,39 @@ class WorkLogQuery:
         self.csv_path = csv_path
         self.ai = OpenAIClient()
         self.backup_ai = OpenAIClient(model_name="gpt-4.1-mini")
+
+
+    def _get_connection(self):
+        """
+        Create a DuckDB connection with the work_logs CSV loaded via pandas
+        and registered as a DuckDB table named work_logs.
+        """
+        df = pd.read_csv(
+            self.csv_path,
+            encoding="utf-8-sig",
+            dtype=str,
+            keep_default_na=False
+        )
+
+        con = duckdb.connect()
+        con.register("work_logs", df)
+        return con
     
     def run_sql_query(self, sql_query):
         """
         Execute a direct SQL query on the work logs.
-        
+
         Args:
-            sql_query (str): SQL query string (use 'work_logs' as table name)
-        
+            sql_query (str): SQL query string (use work_logs as table name)
+
         Returns:
             pandas.DataFrame: Query results
         """
-        con = duckdb.connect()
-        
-        # Replace work_logs reference with actual CSV path
-        query_with_table = sql_query.replace('work_logs', f"'{self.csv_path}'")
-        result = con.execute(query_with_table).fetchdf()
+        con = self._get_connection()
+
+        result = con.execute(sql_query).fetchdf()
         con.close()
-        
+
         self._display_results(result)
         return result
     
@@ -65,14 +80,14 @@ class WorkLogQuery:
         time.sleep(1)
         
         # Get sample data for context
-        con = duckdb.connect()
-        sample_data = con.execute(f"SELECT * FROM '{self.csv_path}' LIMIT 3").fetchdf()
+        con = self._get_connection()
+        sample_data = con.execute(f"SELECT * FROM work_logs LIMIT 3").fetchdf()
         
         # Build AI context
         context = f"""I have a work log system that stores daily work entries in a CSV file.
 Convert the user's natural language question into a DuckDB-compatible SQL query.
 
-The table is accessed as '{self.csv_path}' and has these columns:
+The table is accessed as work_logs and has these columns:
 - Date: The date of the work log (format: YYYY-MM-DD)
 - Full_Text: The complete work log entry text
 - Abridged: A summary/keywords from the log
@@ -85,7 +100,7 @@ Rules:
 - Use ILIKE for case-insensitive text searches
 - Use % wildcards for partial matches
 - For date filtering, use Date >= 'YYYY-MM-DD' format
-- Always use '{self.csv_path}' as the table name (keep the quotes)
+- Always use work_logs as the table name (keep the quotes)
 - Return only the SQL query, no explanations or backticks
 - If the question is incoherent, respond with "Invalid Query."
 
@@ -190,13 +205,13 @@ User question: {question}
         time.sleep(0.5)
         
         # Step 1: Generate SQL query
-        con = duckdb.connect()
-        sample_data = con.execute(f"SELECT * FROM '{self.csv_path}' LIMIT 3").fetchdf()
+        con = self._get_connection()
+        sample_data = con.execute(f"SELECT * FROM work_logs LIMIT 3").fetchdf()
         
         query_gen_prompt = f"""I have a work log system that stores daily work entries in a CSV file.
 Generate a DuckDB-compatible SQL query to retrieve the relevant work logs for creating a summary.
 
-The table is accessed as '{self.csv_path}' and has these columns:
+The table is accessed as work_logs and has these columns:
 - Date: The date of the work log (format: YYYY-MM-DD)
 - Full_Text: The complete work log entry text
 - Abridged: A summary/keywords from the log
@@ -210,7 +225,7 @@ Rules:
 - Use ILIKE for case-insensitive text searches with % wildcards
 - Return ALL relevant columns (Date, Full_Text, Abridged)
 - Order by Date DESC for chronological summaries
-- Always use '{self.csv_path}' as the table name (keep the quotes)
+- Always use work_logs as the table name (keep the quotes)
 - Return ONLY the SQL query, no explanations
 
 User request: {time_period_or_query}
@@ -308,13 +323,13 @@ Generate a professional summary in markdown format with headers and bullets.
         time.sleep(0.5)
         
         # Step 1: Generate SQL query
-        con = duckdb.connect()
-        sample_data = con.execute(f"SELECT * FROM '{self.csv_path}' LIMIT 3").fetchdf()
+        con = self._get_connection()
+        sample_data = con.execute("SELECT * FROM work_logs LIMIT 3").fetchdf()
         
         query_gen_prompt = f"""I have a work log system that stores daily work entries in a CSV file.
 Generate a DuckDB-compatible SQL query to retrieve the relevant work logs needed to answer the user's question.
 
-The table is accessed as '{self.csv_path}' and has these columns:
+The table is accessed as work_logs and has these columns:
 - Date: The date of the work log (format: YYYY-MM-DD)
 - Full_Text: The complete work log entry text
 - Abridged: A summary/keywords from the log
@@ -328,7 +343,7 @@ Rules:
 - Use ILIKE for case-insensitive text searches with % wildcards
 - Return ALL relevant columns (Date, Full_Text, Abridged)
 - Order by Date DESC for chronological context
-- Always use '{self.csv_path}' as the table name (keep the quotes)
+- Always use work_logs as the table name (keep the quotes)
 - Return ONLY the SQL query, no explanations
 
 User question: {question}
